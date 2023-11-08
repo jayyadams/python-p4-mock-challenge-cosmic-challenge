@@ -25,6 +25,35 @@ db.init_app(app)
 def home():
     return ''
 
+@app.route('/planets', methods = ['GET'])
+def planets():
+    planets = Planet.query.all()
+    planets_dict = [planet.to_dict() for planet in planets]
+    response = make_response(
+        planets_dict, 200
+    )
+    return response
+
+@app.oroute('/missions', methods = ['POST'])
+def missions():
+    form_data = request.get_json()
+    try:
+        new_mission = Mission(
+            name = form_data['name'],
+            scientist_id = form_data['scientist_id'],
+            planet_id = form_data['[planet_id]']
+        )
+        db.session.add(new_mission)
+        db.session.commit()
+        response = make_response(
+            new_mission.to_dict(), 200
+        )
+    except ValueError:
+        response = make_response(
+            {"errors": ["validation errors"]}, 400
+        )
+    return response 
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
